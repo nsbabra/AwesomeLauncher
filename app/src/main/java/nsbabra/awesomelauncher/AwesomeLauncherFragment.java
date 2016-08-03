@@ -5,20 +5,25 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v7.widget.DrawableUtils;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
 
 /**
  * Created by nsbabra on 7/29/16.
+ *
  */
+
 public class AwesomeLauncherFragment extends Fragment {
     private static AwesomeLauncherFragment _instance;
     private static final Object mLock = new Object();
@@ -37,7 +42,7 @@ public class AwesomeLauncherFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_awesome_launcher, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.fragment_awesome_launcher_rcview);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
         return mRecyclerView;
     }
 
@@ -50,33 +55,35 @@ public class AwesomeLauncherFragment extends Fragment {
     private void setUpAdapter() {
         Intent startUpIntent = new Intent(Intent.ACTION_MAIN);
         startUpIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
         PackageManager packageManager = getActivity().getPackageManager();
         List<ResolveInfo> activities = packageManager.queryIntentActivities(startUpIntent, 0);
         mRecyclerView.setAdapter(new ActivityAdapter(activities));
     }
 
-
     private class ActivityHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ResolveInfo mResolveInfo;
         private TextView mNameTextView;
+        private ImageView mAppIcon;
 
         public ActivityHolder(View itemView) {
             super(itemView);
-            mNameTextView = (TextView) itemView;
-            mNameTextView.setOnClickListener(this);
+            mNameTextView = (TextView) itemView.findViewById(R.id.item_app_name_text_view);
+            mAppIcon = (ImageView)itemView.findViewById(R.id.item_app_name_icon) ;
+            itemView.setOnClickListener(this);
         }
 
         public void bindActivity(ResolveInfo resolveInfo) {
             mResolveInfo = resolveInfo;
             PackageManager manager = getActivity().getPackageManager();
             String appName = mResolveInfo.loadLabel(manager).toString();
-            mNameTextView.setText(appName);
-//            mNameTextView.setText("Hodor");
+            Drawable drawable = mResolveInfo.loadIcon(manager);
+            mAppIcon.setImageDrawable(drawable);
+            mNameTextView.setText("Hodor");
+//            mNameTextView.setText(appName);
         }
 
         @Override
-        public void onClick(View view) {
+        public void onClick(View v) {
             ActivityInfo activityInfo = mResolveInfo.activityInfo;
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.setClassName(activityInfo.applicationInfo.packageName, activityInfo.name);
@@ -95,7 +102,7 @@ public class AwesomeLauncherFragment extends Fragment {
         @Override
         public ActivityHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
-            View view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+            View view = inflater.inflate(R.layout.single_applcation_item, parent, false);
             return new ActivityHolder(view);
         }
 
@@ -111,3 +118,4 @@ public class AwesomeLauncherFragment extends Fragment {
         }
     }
 }
+
